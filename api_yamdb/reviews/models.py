@@ -69,6 +69,7 @@ class Title(models.Model):
     category = models.ForeignKey(
         Category,
         on_delete=models.SET_NULL,
+        null=True,
         verbose_name="Категория произведения"
     )
 
