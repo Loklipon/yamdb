@@ -2,7 +2,8 @@ from django.shortcuts import get_object_or_404
 
 from rest_framework import viewsets
 
-from rest_framework.pagination import PageNumberPagination, LimitOffsetPagination
+from rest_framework.pagination import (PageNumberPagination,
+                                       LimitOffsetPagination)
 
 from reviews.models import Review, Title, Category, Genre, Title
 from .permissions import CommentReviewPermission, AdminOrReadOnly
@@ -46,8 +47,8 @@ class CommentViewSet(viewsets.ModelViewSet):
             pk=review_id
         )
         serializer.save(author=self.request.user, review=review)
-        
-        
+
+
 class TitleViewSet(viewsets.ModelViewSet):
     queryset = Title.objects.all()
     permission_classes = [AdminOrReadOnly]
@@ -71,4 +72,3 @@ class CategoryViewSet(viewsets.ModelViewSet):
     serializer_class = CategorySerializer
     permission_classes = [AdminOrReadOnly]
     pagination_class = LimitOffsetPagination
-

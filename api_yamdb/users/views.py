@@ -21,7 +21,8 @@ class SignUpView(APIView):
         serializer = SignUpSerializer(data=request.data)
         if serializer.is_valid():
             if serializer.validated_data.get('username') == 'me':
-                return Response(serializer.errors, status=HTTPStatus.BAD_REQUEST)
+                return Response(serializer.errors,
+                                status=HTTPStatus.BAD_REQUEST)
             confirmation_code = random.randint(1, 1000000)
             email = serializer.validated_data.get('email')
             try:
@@ -43,7 +44,7 @@ class SignUpView(APIView):
 
 class CreateTokenView(APIView):
     def post(self, request):
-        serializer = TokenSerializer(data=request.data)
+        serializer = CreateTokenSerializer(data=request.data)
         if serializer.is_valid():
             username = serializer.data.get('username')
             confirmation_code = serializer.data.get('mail_confirmation_code')
