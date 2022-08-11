@@ -1,9 +1,6 @@
-from django.core.validators import MinValueValidator, MaxValueValidator
-
+from django.core.validators import MaxValueValidator, MinValueValidator
 from django.db import models
-
 from reviews.validators import year_validator
-
 from users.models import User
 
 
@@ -85,7 +82,7 @@ class Title(models.Model):
 
 class GenreTitle(models.Model):
     genre = models.ForeignKey(Genre, on_delete=models.CASCADE)
-    title = models.ForeignKey(Title, on_delete=models.Case)
+    title = models.ForeignKey(Title, on_delete=models.CASCADE)
 
     def __str__(self):
         return f'{self.genre} {self.title}'
