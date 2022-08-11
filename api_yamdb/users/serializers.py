@@ -18,7 +18,7 @@ class CreateTokenSerializer(serializers.ModelSerializer):
         fields = ('username', 'mail_confirmation_code')
 
 
-class UserSerializer(serializers.ModelSerializer):
+class UsersSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = User

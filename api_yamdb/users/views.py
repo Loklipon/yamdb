@@ -1,19 +1,19 @@
 import random
 
-from http import HTTPStatus
-
 from django.core.mail import send_mail
-
+from django.shortcuts import get_object_or_404
+from http import HTTPStatus
+from rest_framework import viewsets, permissions
+from rest_framework.decorators import action
 from rest_framework.response import Response
+from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework.views import APIView
 
 from .exceptions import SendMailProblem
-
 from .models import User
-
-from rest_framework_simplejwt.tokens import RefreshToken
-
-from .serializers import SignUpSerializer, CreateTokenSerializer
+from .permissions import AuthAdminSuperUserPermission
+from .serializers import (SignUpSerializer,
+                          CreateTokenSerializer, UsersSerializer)
 
 
 class SignUpView(APIView):
@@ -48,7 +48,7 @@ class CreateTokenView(APIView):
         if serializer.is_valid():
             username = serializer.data.get('username')
             confirmation_code = serializer.data.get('mail_confirmation_code')
-            user = User.objects.get(username=username)
+            user = get_object_or_404(User, username=username)
             if confirmation_code != user.mail_confirmation_code:
                 return Response(serializer.errors,
                                 status=HTTPStatus.BAD_REQUEST)
@@ -56,3 +56,29 @@ class CreateTokenView(APIView):
             return Response({'token': str(token.access_token)},
                             status=HTTPStatus.OK)
         return Response(serializer.errors, status=HTTPStatus.BAD_REQUEST)
+
+
+class UsersViewSet(viewsets.ModelViewSet):
+    queryset = User.objects.all()
+    serializer_class = UsersSerializer
+    lookup_field = 'username'
+    permission_classes = (AuthAdminSuperUserPermission, )
+
+    @action(
+        methods=['get', 'patch'],
+        detail=False,
+        permission_classes=(permissions.IsAuthenticated, ),
+    )
+    def me(self, request):
+        if request.method == 'GET':
+            serializer = UsersSerializer(request.user)
+            return Response(serializer.data, status=HTTPStatus.OK)
+        if request.method == 'PATCH':
+            serializer = UsersSerializer(request.user,
+                                         data=request.data,
+                                         partial=True)
+            if serializer.is_valid():
+                if request.user.role == 'user':
+                    serializer.validated_data['role'] = 'user'
+                serializer.save()
+            return Response(serializer.data, status=HTTPStatus.OK)
