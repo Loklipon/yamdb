@@ -26,6 +26,7 @@ class TitleGetSerializer(serializers.ModelSerializer):
         model = Title
         fields = '__all__'
 
+
 class TitleModifySerializer(serializers.ModelSerializer):
     genre = serializers.SlugRelatedField(
         queryset=Genre.objects.all(),

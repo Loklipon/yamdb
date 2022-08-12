@@ -1,9 +1,7 @@
-from django.urls import include, path
-from rest_framework.routers import DefaultRouter
-from rest_framework_simplejwt.views import TokenObtainPairView
-
 from api.views import (CategoryViewSet, CommentViewSet, GenreViewSet,
                        ReviewsViewSet, TitleViewSet)
+from django.urls import include, path
+from rest_framework.routers import DefaultRouter
 from users.views import CreateTokenView, SignUpView, UsersViewSet
 
 app_name = 'api'
