@@ -81,8 +81,7 @@ class Review(models.Model):
         on_delete=models.CASCADE
     )
     text = models.TextField(
-        'Отзыв',
-        blank=True
+        verbose_name='Отзыв'
     )
     author = models.ForeignKey(
         User,
@@ -91,6 +90,7 @@ class Review(models.Model):
         on_delete=models.CASCADE
     )
     score = models.IntegerField(
+        verbose_name='Оценка',
         validators=[MinValueValidator(1),
                     MaxValueValidator(10)]
     )
