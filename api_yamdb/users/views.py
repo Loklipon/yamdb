@@ -1,8 +1,8 @@
+from http import HTTPStatus
 import random
 
 from django.core.mail import send_mail
 from django.shortcuts import get_object_or_404
-from http import HTTPStatus
 from rest_framework import viewsets, permissions
 from rest_framework.decorators import action
 from rest_framework.response import Response
@@ -26,10 +26,10 @@ class SignUpView(APIView):
             confirmation_code = random.randint(1, 1000000)
             email = serializer.validated_data.get('email')
             try:
-                send_mail('Confirm your e-mail address',
-                          f'Code: {confirmation_code}',
-                          'Team YaMDb',
-                          (f'{email}',))
+                send_mail('Confirm your email address',
+                          f'Ваш код подтверждения: {confirmation_code}',
+                          'no-reply@yamdb.project',
+                          (email, ))
             except SendMailProblem:
                 raise SendMailProblem(
                     'Ошибка отправки письма с подтверждением')
@@ -67,7 +67,7 @@ class UsersViewSet(viewsets.ModelViewSet):
     @action(
         methods=['get', 'patch'],
         detail=False,
-        permission_classes=(permissions.IsAuthenticated, ),
+        permission_classes=(permissions.IsAuthenticated, )
     )
     def me(self, request):
         if request.method == 'GET':
