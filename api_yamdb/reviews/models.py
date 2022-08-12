@@ -1,57 +1,37 @@
 from django.core.validators import MaxValueValidator, MinValueValidator
 from django.db import models
-
 from reviews.validators import year_validator
 from users.models import User
 
 
 class Category(models.Model):
-    """
-    Класс модели `Категория`.
-
-    Поля:
-        name: TextField
-        slug: SlugField
-    Реализована функции str.
-    """
     name = models.TextField(verbose_name="Название категории", max_length=256)
     slug = models.SlugField(
         verbose_name="Уникальное слаг категории", max_length=50, unique=True)
 
+    class Meta:
+        ordering = ['-slug']
+        verbose_name = 'Категория'
+        verbose_name_plural = 'Категории'
+
     def __str__(self):
-        """Перевод поля к str, используя name."""
         return self.name
 
 
 class Genre(models.Model):
-    """
-    Класс модели `Жанр`.
-
-    Поля:
-        name: TextField
-        slug: SlugField
-    Реализована функции str.
-    """
     name = models.TextField(verbose_name="Название жанра", max_length=256)
     slug = models.SlugField(
         verbose_name="Уникальный слаг жанра", max_length=50, unique=True)
 
     def __str__(self):
-        """Перевод поля к str, используюя name."""
         return self.name
 
+    class Meta:
+        ordering = ['-slug']
+        verbose_name = 'Жанр'
+        verbose_name_plural = 'Жанры'
 
 class Title(models.Model):
-    """
-    Класс модели произведений.
-
-    Поля:
-        name: TextField
-        year: DateField
-        description: TextField (non required)
-        genre: ForeignKey to Genres
-        category: ForignKey to Categories
-    """
     name = models.TextField(
         verbose_name="Название произведения", max_length=256
     )
@@ -76,8 +56,12 @@ class Title(models.Model):
         verbose_name="Категория произведения"
     )
 
+    class Meta:
+        ordering = ['-year']
+        verbose_name = 'Произведение'
+        verbose_name_plural = 'Произведения'
+
     def __str__(self):
-        """Перевод поля к str, используюя name."""
         return self.name
 
 
