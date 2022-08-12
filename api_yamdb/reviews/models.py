@@ -19,7 +19,7 @@ class Category(models.Model):
         verbose_name="Уникальное слаг категории", max_length=50, unique=True)
 
     def __str__(self):
-        """Перевод поля к str, используюя name."""
+        """Перевод поля к str, используя name."""
         return self.name
 
 
@@ -91,7 +91,7 @@ class GenreTitle(models.Model):
 
 class Review(models.Model):
     title = models.ForeignKey(
-        'Title',
+        Title,
         verbose_name='Произведение',
         related_name='Reviews',
         on_delete=models.CASCADE
@@ -102,7 +102,7 @@ class Review(models.Model):
     )
     author = models.ForeignKey(
         User,
-        verbose_name='Автор ревью',
+        verbose_name='Автор отзыва',
         related_name='Reviews',
         on_delete=models.CASCADE
     )
@@ -133,7 +133,7 @@ class Review(models.Model):
 class Comment(models.Model):
     review = models.ForeignKey(
         Review,
-        verbose_name='Отзыв',
+        verbose_name='Комментарий',
         related_name='Comments',
         on_delete=models.CASCADE
     )
