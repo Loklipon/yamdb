@@ -31,6 +31,7 @@ class Genre(models.Model):
         verbose_name = 'Жанр'
         verbose_name_plural = 'Жанры'
 
+
 class Title(models.Model):
     name = models.TextField(
         verbose_name="Название произведения", max_length=256

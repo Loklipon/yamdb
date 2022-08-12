@@ -44,4 +44,3 @@ class User(AbstractUser):
             fields=('username', 'email'), name='unique_following')]
         verbose_name = 'Пользователь'
         verbose_name_plural = 'Пользователи'
-       
