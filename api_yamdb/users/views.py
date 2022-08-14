@@ -1,7 +1,7 @@
 from http import HTTPStatus
-import random
+import uuid
 
-from django.core.mail import send_mail
+
 from django.shortcuts import get_object_or_404
 from rest_framework import viewsets, permissions
 from rest_framework.decorators import action
@@ -9,7 +9,7 @@ from rest_framework.response import Response
 from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework.views import APIView
 
-from .exceptions import SendMailProblem
+
 from .models import User
 from .permissions import AuthAdminSuperUserPermission
 from .serializers import (SignUpSerializer,
@@ -18,25 +18,14 @@ from .serializers import (SignUpSerializer,
 
 class SignUpView(APIView):
     def post(self, request):
-        serializer = SignUpSerializer(data=request.data)
+        confirmation_code = uuid.uuid4()
+        serializer = SignUpSerializer(
+            data=request.data,
+        )
         if serializer.is_valid():
-            if serializer.validated_data.get('username') == 'me':
-                return Response(serializer.errors,
-                                status=HTTPStatus.BAD_REQUEST)
-            confirmation_code = random.randint(1, 1000000)
-            email = serializer.validated_data.get('email')
-            try:
-                send_mail('Confirm your email address',
-                          f'Ваш код подтверждения: {confirmation_code}',
-                          'no-reply@yamdb.project',
-                          (email, ))
-            except SendMailProblem:
-                raise SendMailProblem(
-                    'Ошибка отправки письма с подтверждением')
-            serializer.save()
-            username = request.data.get('username')
-            user = User.objects.get(username=username)
+            user = serializer.save()
             user.mail_confirmation_code = confirmation_code
+            user.send_mail()
             user.save()
             return Response(serializer.data, status=HTTPStatus.OK)
         return Response(serializer.errors, status=HTTPStatus.BAD_REQUEST)

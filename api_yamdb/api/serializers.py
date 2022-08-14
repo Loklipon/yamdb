@@ -1,5 +1,5 @@
-from rest_framework import serializers
 from django.shortcuts import get_object_or_404
+from rest_framework import serializers
 
 from reviews.models import Category, Comment, Genre, Review, Title
 
@@ -51,23 +51,23 @@ class ReviewSerializer(serializers.ModelSerializer):
     )
 
     class Meta:
-        fields = ['id', 'text', 'author', 'score', 'pub_date']
         model = Review
+        fields = ['id', 'text', 'author', 'score', 'pub_date']
 
     def get_title(self):
         return get_object_or_404(
-            Title, id=self.context.get("view").kwargs.get("title_id")
+            Title, id=self.context.get('view').kwargs.get('title_id')
         )
 
     def validate(self, data):
         if (
             Review.objects.filter(
-                author=self.context["request"].user, title=self.get_title()
+                author=self.context['request'].user, title=self.get_title()
             ).exists()
-            and self.context["request"].method != "PATCH"
+            and self.context['request'].method != 'PATCH'
         ):
             raise serializers.ValidationError(
-                "Вы уже оставляли отзыв на это произведение"
+                'Вы уже оставляли отзыв на это произведение'
             )
         return data
 

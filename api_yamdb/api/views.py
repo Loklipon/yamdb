@@ -6,7 +6,7 @@ from rest_framework import filters, mixins, viewsets
 from rest_framework.pagination import LimitOffsetPagination
 from reviews.models import Category, Genre, Review, Title
 
-from .permissions import AdminOrReadOnly, CommentReviewPermission
+from .permissions import AdminOrReadOnly, IsAuthorAdminModeratorOrReadOnly
 from .serializers import (CategorySerializer, CommentSerializer,
                           GenreSerializer, ReviewSerializer,
                           TitleGetSerializer, TitleModifySerializer)
@@ -15,21 +15,20 @@ from .serializers import (CategorySerializer, CommentSerializer,
 class ReviewsViewSet(viewsets.ModelViewSet):
     serializer_class = ReviewSerializer
     pagination_class = LimitOffsetPagination
-    permission_classes = (CommentReviewPermission,)
+    permission_classes = (IsAuthorAdminModeratorOrReadOnly,)
 
     def get_queryset(self):
         title = get_object_or_404(Title, pk=self.kwargs.get('title_id'))
-        return title.Reviews.all()
+        return title.reviews.all()
 
     def perform_create(self, serializer):
         title = get_object_or_404(Title, pk=self.kwargs.get('title_id'))
-
         serializer.save(author=self.request.user, title=title)
 
 
 class CommentViewSet(viewsets.ModelViewSet):
     serializer_class = CommentSerializer
-    permission_classes = (CommentReviewPermission,)
+    permission_classes = (IsAuthorAdminModeratorOrReadOnly,)
 
     def get_queryset(self):
         title_id = self.kwargs.get('title_id')
@@ -38,7 +37,7 @@ class CommentViewSet(viewsets.ModelViewSet):
             Review.objects.filter(title_id=title_id),
             pk=review_id
         )
-        return review.Comments.all()
+        return review.comments.all()
 
     def perform_create(self, serializer):
         title_id = self.kwargs.get('title_id')
@@ -51,7 +50,7 @@ class CommentViewSet(viewsets.ModelViewSet):
 
 
 class TitleViewSet(viewsets.ModelViewSet):
-    queryset = Title.objects.annotate(rating=Avg('Reviews__score'))
+    queryset = Title.objects.annotate(rating=Avg('reviews__score'))
     permission_classes = [AdminOrReadOnly]
     pagination_class = LimitOffsetPagination
     filter_backends = [DjangoFilterBackend]
@@ -63,23 +62,20 @@ class TitleViewSet(viewsets.ModelViewSet):
         return TitleModifySerializer
 
 
-class GenreViewSet(mixins.CreateModelMixin, mixins.DestroyModelMixin,
-                   mixins.ListModelMixin, viewsets.GenericViewSet):
+class GenreCategoryViewSet(mixins.CreateModelMixin, mixins.DestroyModelMixin,
+                           mixins.ListModelMixin, viewsets.GenericViewSet):
+    permission_classes = [AdminOrReadOnly]
+    pagination_class = LimitOffsetPagination
+    filter_backends = (filters.SearchFilter,)
+    search_fields = ['name']
+    lookup_field = 'slug'
+
+
+class GenreViewSet(GenreCategoryViewSet):
     queryset = Genre.objects.all()
     serializer_class = GenreSerializer
-    permission_classes = [AdminOrReadOnly]
-    pagination_class = LimitOffsetPagination
-    filter_backends = (filters.SearchFilter,)
-    search_fields = ['name']
-    lookup_field = 'slug'
 
 
-class CategoryViewSet(mixins.CreateModelMixin, mixins.DestroyModelMixin,
-                      mixins.ListModelMixin, viewsets.GenericViewSet):
+class CategoryViewSet(GenreCategoryViewSet):
     queryset = Category.objects.all()
     serializer_class = CategorySerializer
-    permission_classes = [AdminOrReadOnly]
-    pagination_class = LimitOffsetPagination
-    filter_backends = (filters.SearchFilter,)
-    search_fields = ['name']
-    lookup_field = 'slug'

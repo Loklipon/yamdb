@@ -1,8 +1,16 @@
+from smtplib import SMTPException
 from django.contrib.auth.models import AbstractUser
+from django.core.mail import send_mail
 from django.db import models
+
+from .exceptions import SendMailProblem
 
 
 class User(AbstractUser):
+    USER = 'user'
+    MODERATOR = 'moderator'
+    ADMIN = 'admin'
+
     username = models.CharField(
         max_length=150,
         unique=True,
@@ -26,9 +34,9 @@ class User(AbstractUser):
         max_length=150,
         blank=True,
         choices=(
-            ('user', 'Пользователь'),
-            ('moderator', 'Модератор'),
-            ('admin', 'Администратор'),
+            (USER, 'Пользователь'),
+            (MODERATOR, 'Модератор'),
+            (ADMIN, 'Администратор'),
         ),
         default='user',
         verbose_name='Право управления'
@@ -44,3 +52,23 @@ class User(AbstractUser):
             fields=('username', 'email'), name='unique_following')]
         verbose_name = 'Пользователь'
         verbose_name_plural = 'Пользователи'
+
+    def __str__(self):
+        return self.username
+
+    @property
+    def is_admin(self):
+        return self.is_staff or self.is_superuser or self.role == 'admin'
+
+    @property
+    def is_moderator(self):
+        return self.role == 'moderator'
+
+    def send_mail(self):
+        try:
+            send_mail('Confirm your email address',
+                      f'Ваш код подтверждения: {self.mail_confirmation_code}',
+                      'no-reply@yamdb.project',
+                      (self.email, ))
+        except SMTPException:
+            raise SendMailProblem('Ошибка отправки письма с подтверждением')
