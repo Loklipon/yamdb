@@ -10,23 +10,24 @@ class SignUpSerializer(serializers.ModelSerializer):
         model = User
         fields = ('username', 'email')
 
-    def validate(self, data):
+    def validate_username(self, value):
         regex = re.compile('^[a-z][a-z0-9_]+$')
-        username = data.get('username')
-        email = data.get('email')
-        if not regex.search(username):
+        if not regex.search(value):
             raise serializers.ValidationError(
                 'Недопустимое имя пользователя')
-        if username == 'me':
+        if value == 'me':
             raise serializers.ValidationError(
                 'Имя пользователя не может быть "me"')
-        if User.objects.filter(username=username).exists():
+        if User.objects.filter(username=value).exists():
             raise serializers.ValidationError(
                 'Пользователь с таким username уже существует')
-        if User.objects.filter(email=email).exists():
+        return value
+
+    def validate_email(self, value):
+        if User.objects.filter(email=value).exists():
             raise serializers.ValidationError(
                 'Пользователь с таким email уже существует')
-        return data
+        return value
 
 
 class CreateTokenSerializer(serializers.ModelSerializer):

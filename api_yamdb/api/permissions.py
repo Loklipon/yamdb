@@ -6,13 +6,13 @@ from users.models import User
 class IsAuthorAdminModeratorOrReadOnly(permissions.BasePermission):
 
     def has_permission(self, request, view):
-        self.message = 'Нужно авторизоваться.'
+        self.message = 'Для доступа необходима авторизация'
         return (
             request.method in permissions.SAFE_METHODS
             or request.user.is_authenticated)
 
     def has_object_permission(self, request, view, obj):
-        self.message = 'Вы не автор.'
+        self.message = 'Возможность изменять информацию есть только у автора'
         return (
             request.method in permissions.SAFE_METHODS
             or obj.author == request.user
